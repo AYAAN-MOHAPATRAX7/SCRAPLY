@@ -1,60 +1,86 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 🌱 SCRAPLY
 
-# Run and deploy your AI Studio app
+### Turn Surplus Into Recovery
 
-This contains everything you need to run your app locally.
+SCRAPLY is an AI-powered food recovery platform designed to help farmers, retailers, and NGOs make better decisions about surplus food before it loses its value.
 
-View your app in AI Studio: https://ai.studio/apps/aafca110-dec1-4347-a2c4-e4ce59a1a0e3
+Instead of treating every surplus item as simple "waste", SCRAPLY analyzes its condition, urgency, context, and available recovery pathways to determine what should happen next.
 
-## Run Locally
+> **Don't just detect food waste. Decide what to do before it becomes waste.**
 
-**Prerequisites:**  Node.js
+---
 
+## 🎯 Problem
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+A large amount of food becomes waste because the right decision is not made at the right time.
 
+Farmers may have excess harvest.
 
-## Integrated teammate modules
+Retailers may have unsold inventory approaching its best recovery window.
 
-This version integrates:
-- Smart Map + Matching under `src/components/matching/SmartMapDashboard.jsx`
-- HarvestGuard backend under `services/recovery-api/harvestguard/`
-- Buyer backend under `services/recovery-api/buyer/`
+NGOs may have demand for food but lack visibility into available surplus.
 
-The original teammate Smart Map component was preserved rather than rewritten. The existing SCRAPLY `matching` navigation hook now renders it.
+The problem is not only identifying surplus.
 
+The bigger question is:
 
-## Integrated UI
+> **What should happen to this food right now?**
 
-The main React app now includes:
-- `HarvestGuard` under the Actions palette (Farmer/Admin)
-- `Smart Map & Matching` under the Actions palette
-- Food-listing "Find Receiver" actions open Smart Map
-- HarvestGuard can add its recommendation into the existing recovery pipeline for Farmer/Admin
+And even more importantly:
 
-### Run
+> **What happens if we wait?**
 
-```bash
-npm install
-npm run dev
-```
+---
 
-The SCRAPLY full-stack server runs on `http://localhost:3000`.
+# 💡 Our Solution
 
-### Optional teammate HarvestGuard API
+SCRAPLY creates an intelligent recovery workflow around surplus food.
 
-The original FastAPI HarvestGuard service is preserved under `services/recovery-api`.
-Run it separately from that directory if you want the original `/api/harvestguard/*` endpoints:
+A user can provide food information and an image. SCRAPLY uses AI to understand the situation and provide a recovery recommendation.
 
-```bash
-pip install -r requirements.txt
-python main.py
-```
+Possible pathways include:
 
-It defaults to port 8000. The React HarvestGuard UI tries port 8000 first and then falls back to the SCRAPLY Node AI endpoint on port 3000.
+- 🛒 Sell
+- 💰 Discount
+- 📦 Store
+- 🤝 Donate
+- 🏭 Process
+- ♻️ Reuse
+- 🔄 Recover
+
+SCRAPLY also introduces a **"What if I wait?"** scenario to help users understand how delaying action could affect the food's freshness, urgency, and recovery value.
+
+---
+
+# 🤖 Powered by Gemma 4
+
+SCRAPLY is built for the **Best Use of Gemma 4** track.
+
+Gemma 4 is used as the AI reasoning layer for food-condition analysis and recovery recommendations.
+
+The system can work with contextual information such as:
+
+- Food type
+- Quantity
+- Current condition
+- Remaining time
+- Location
+- Market context
+- Intended recovery pathway
+
+The AI transforms this information into an actionable recommendation rather than simply classifying the food.
+
+### Example
+
+```text
+Input
+↓
+Food image + food details
+↓
+Gemma 4 analysis
+↓
+Condition & urgency assessment
+↓
+Recovery recommendation
+↓
+Action
