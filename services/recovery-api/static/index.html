@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroScraps - Buyer Marketplace & HarvestGuard AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="navbar">
+            <div class="logo">
+                <span class="leaf-icon">🌱</span>
+                <span class="logo-text">ZERO <strong>SCRAPS</strong></span>
+                <span class="badge-module">BUYER MODULE v1.0</span>
+            </div>
+
+            <!-- Top Nav Views Toggle -->
+            <div class="nav-tabs">
+                <button class="nav-tab-btn active" onclick="switchMainView('buyer-view')">🛒 Buyer Marketplace</button>
+                <button class="nav-tab-btn" onclick="switchMainView('harvestguard-view')">🌱 HarvestGuard AI Engine</button>
+            </div>
+
+            <div class="nav-links">
+                <!-- User Profile & Role Selector -->
+                <div class="user-role-box">
+                    <span class="user-id-badge" id="display-user-id">👤 buyer_demo</span>
+                    <select id="role-selector" class="role-select" onchange="handleRoleChange(event)" title="Simulate User Role">
+                        <option value="BUYER" selected>Role: BUYER</option>
+                        <option value="SELLER">Role: SELLER (Non-Buyer)</option>
+                        <option value="NGO">Role: NGO (Non-Buyer)</option>
+                    </select>
+                </div>
+                <span class="status-indicator" id="system-status">Checking...</span>
+            </div>
+        </header>
+
+        <!-- VIEW 1: BUYER MARKETPLACE DASHBOARD -->
+        <main id="buyer-view" class="main-view active">
+            <!-- Hero / Header Banner -->
+            <div class="dashboard-hero">
+                <div class="hero-text">
+                    <h1>Buyer Dashboard</h1>
+                    <p>Browse available surplus food listings, inspect HarvestGuard AI value-retention recommendations, and claim food directly.</p>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-pill">
+                        <span class="stat-label">Available Listings</span>
+                        <strong class="stat-value" id="stat-available-count">0</strong>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="stat-label">My Active Claims</span>
+                        <strong class="stat-value" id="stat-claims-count">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar: Search, Filters & Sorting -->
+            <div class="toolbar-panel">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="buyer-search-input" placeholder="Search food, location, or notes..." oninput="debounceFilterBuyerListings()">
+                </div>
+
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="filter-urgency">Urgency</label>
+                        <select id="filter-urgency" onchange="filterBuyerListings()">
+                            <option value="">All Urgencies</option>
+                            <option value="CRITICAL">🔴 Critical</option>
+                            <option value="HIGH">🟠 High</option>
+                            <option value="MEDIUM">🟡 Medium</option>
+                            <option value="LOW">🔵 Low</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filter-action">AI Recommendation</label>
+                        <select id="filter-action" onchange="filterBuyerListings()">
+                            <option value="">All Actions</option>
+                            <option value="SELL">SELL</option>
+                            <option value="DISCOUNT">DISCOUNT</option>
+                            <option value="DONATE">DONATE</option>
+                            <option value="PROCESS">PROCESS</option>
+                            <option value="STORE">STORE</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sort-by">Sort By</label>
+                        <select id="sort-by" onchange="filterBuyerListings()">
+                            <option value="latest">Recently Listed</option>
+                            <option value="urgency">Highest Urgency</option>
+                            <option value="nearest">Nearest First</option>
+                            <option value="price_low">Lowest Price</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-reset-filters" onclick="resetBuyerFilters()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Section 1: Available Food Listings -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Available Food</h2>
+                    <span class="section-subtitle">Surplus food listings open for claim</span>
+                </div>
+
+                <div id="available-listings-loading" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p>Fetching available food listings...</p>
+                </div>
+
+                <div id="available-listings-empty" class="empty-state hidden">
+                    <div class="empty-icon">🥦</div>
+                    <h3>No Available Food Listings Found</h3>
+                    <p>Try adjusting your search query or filter parameters.</p>
+                </div>
+
+                <div id="available-food-grid" class="cards-grid">
+                    <!-- Available food cards dynamically rendered here -->
+                </div>
+            </section>
+
+            <!-- Section 2: My Claimed Food ("My Claims") -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>My Claims</h2>
+                    <span class="section-subtitle">Food claimed by your buyer account</span>
+                </div>
+
+                <div id="my-claims-loading" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p>Loading your claimed food items...</p>
+                </div>
+
+                <div id="my-claims-empty" class="empty-state hidden">
+                    <div class="empty-icon">📦</div>
+                    <h3>No Claims Yet</h3>
+                    <p>You haven't claimed any surplus food listings yet. Click <strong>[Claim]</strong> on an available listing above.</p>
+                </div>
+
+                <div id="my-claims-grid" class="cards-grid">
+                    <!-- Claimed food cards dynamically rendered here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- VIEW 2: HARVESTGUARD AI ENGINE (EXISTING ENGINE) -->
+        <main id="harvestguard-view" class="main-view hidden">
+            <div class="main-content">
+                <!-- Left Side: Control & Input -->
+                <section class="panel input-panel">
+                    <div class="panel-header">
+                        <h2>Surplus Food Analysis</h2>
+                        <p>RESCUE → REUSE → RECOVER → DISPOSE decision engine</p>
+                    </div>
+
+                    <!-- Test Preset Buttons -->
+                    <div class="presets-container">
+                        <span class="preset-label">Quick Test Scenarios:</span>
+                        <div class="preset-buttons">
+                            <button type="button" class="btn-preset" onclick="loadPreset('sell')">🍅 Fresh Tomatoes (Sell)</button>
+                            <button type="button" class="btn-preset" onclick="loadPreset('discount')">🌾 Rice (Discount)</button>
+                            <button type="button" class="btn-preset" onclick="loadPreset('store')">📦 Storage (Store)</button>
+                            <button type="button" class="btn-preset" onclick="loadPreset('donate')">🍱 Surplus Meals (Donate)</button>
+                            <button type="button" class="btn-preset" onclick="loadPreset('process')">🍇 Fruit Jam (Process)</button>
+                            <button type="button" class="btn-preset" onclick="loadPreset('recover')">🍌 Compost/Feed (Recover)</button>
+                            <button type="button" class="btn-preset" onclick="loadPreset('vague')">❓ Vague Input</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabs: Form Analysis vs Conversational Ask -->
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab('analysis-tab')">Surplus Form</button>
+                        <button class="tab-btn" onclick="switchTab('ask-tab')">Ask HarvestGuard AI</button>
+                    </div>
+
+                    <!-- Tab 1: Form Analysis -->
+                    <div id="analysis-tab" class="tab-content active">
+                        <form id="harvest-form" onsubmit="handleAnalyzeSubmit(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="food">Food Item Name</label>
+                                    <input type="text" id="food" name="food" placeholder="e.g. Tomatoes, Rice, Milk">
+                                </div>
+                                <div class="form-group half">
+                                    <label for="quantity">Quantity</label>
+                                    <input type="number" step="any" id="quantity" name="quantity" placeholder="100">
+                                </div>
+                                <div class="form-group half">
+                                    <label for="unit">Unit</label>
+                                    <input type="text" id="unit" name="unit" placeholder="kg, tonnes, boxes">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label for="harvest_date">Harvest Date</label>
+                                    <input type="date" id="harvest_date" name="harvest_date">
+                                </div>
+                                <div class="form-group half">
+                                    <label for="expiry_date">Expiry / Best Before</label>
+                                    <input type="date" id="expiry_date" name="expiry_date">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label for="current_price">Current Listed Price</label>
+                                    <input type="number" step="any" id="current_price" name="current_price" placeholder="40">
+                                </div>
+                                <div class="form-group half">
+                                    <label for="currency">Currency</label>
+                                    <input type="text" id="currency" name="currency" value="INR">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" name="location" placeholder="e.g. Chennai, Tamil Nadu">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Notes / Intent</label>
+                                <textarea id="description" name="description" rows="2" placeholder="e.g. Harvested yesterday, need to move quickly before market closes."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="voice_transcript">Voice Transcript (Optional)</label>
+                                <input type="text" id="voice_transcript" name="voice_transcript" placeholder="e.g. I have 100 kg tomatoes harvested yesterday and I need to sell them quickly.">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label for="image">Food Image File</label>
+                                    <input type="file" id="image" name="image" accept="image/*">
+                                </div>
+                                <div class="form-group half">
+                                    <label for="language">Language</label>
+                                    <select id="language" name="language">
+                                        <option value="en">English</option>
+                                        <option value="ta">Tamil (தமிழ்)</option>
+                                        <option value="hi">Hindi (हिंदी)</option>
+                                        <option value="te">Telugu (తెలుగు)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-submit" id="btn-analyze">
+                                <span>Analyze Surplus Food with Gemma 4</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: Ask HarvestGuard -->
+                    <div id="ask-tab" class="tab-content">
+                        <div class="chat-container">
+                            <div id="chat-messages" class="chat-messages">
+                                <div class="chat-msg ai-msg">
+                                    <strong>HarvestGuard AI:</strong> Hello! Ask me any question about managing surplus food, storage tips, or market pathways.
+                                </div>
+                            </div>
+                            <form id="ask-form" onsubmit="handleAskSubmit(event)" class="chat-input-form">
+                                <input type="text" id="ask_query" placeholder="Ask e.g. I have 50kg tomatoes. What should I do?" required>
+                                <button type="submit" class="btn-ask">Send</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Side: AI Decision Output -->
+                <section class="panel output-panel">
+                    <div class="panel-header">
+                        <h2>AI Decision Support Result</h2>
+                        <p>Structured recommendation generated by Gemma 4</p>
+                    </div>
+
+                    <div id="loading-state" class="loading-state hidden">
+                        <div class="spinner"></div>
+                        <p>HarvestGuard is analyzing surplus parameters with Gemma 4...</p>
+                    </div>
+
+                    <div id="empty-state" class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <h3>No Analysis Generated Yet</h3>
+                        <p>Fill out the form on the left or click one of the quick test scenarios to generate a decision recommendation.</p>
+                    </div>
+
+                    <div id="error-state" class="error-card hidden">
+                        <div class="error-header">
+                            <span class="error-icon">⚠️</span>
+                            <strong id="error-code">ERROR</strong>
+                        </div>
+                        <p id="error-message">Something went wrong.</p>
+                    </div>
+
+                    <div id="result-card" class="result-card hidden">
+                        <div class="result-header">
+                            <div class="food-info">
+                                <h3 id="res-food">Tomatoes</h3>
+                                <span class="quantity-badge" id="res-quantity">100 kg</span>
+                            </div>
+                            <div class="action-badges">
+                                <span class="action-badge" id="res-action">SELL</span>
+                                <span class="urgency-badge" id="res-urgency">HIGH URGENCY</span>
+                            </div>
+                        </div>
+
+                        <div class="result-body">
+                            <div class="info-block main-reason">
+                                <label>Recommendation Reason:</label>
+                                <p id="res-reason">-</p>
+                            </div>
+
+                            <div class="info-grid">
+                                <div class="grid-item">
+                                    <label>Suggested Discount:</label>
+                                    <span id="res-discount">-</span>
+                                </div>
+                                <div class="grid-item">
+                                    <label>Suggested Price:</label>
+                                    <span id="res-price">-</span>
+                                </div>
+                                <div class="grid-item">
+                                    <label>Shelf Life Remaining:</label>
+                                    <span id="res-shelf-life">-</span>
+                                </div>
+                                <div class="grid-item">
+                                    <label>AI Confidence:</label>
+                                    <span id="res-confidence">-</span>
+                                </div>
+                            </div>
+
+                            <div id="missing-info-block" class="info-block missing-block hidden">
+                                <label>⚠️ Missing Information Needed:</label>
+                                <ul id="res-missing-list"></ul>
+                            </div>
+
+                            <div id="notes-block" class="info-block notes-block">
+                                <label>📋 Notes & Food-Safety Guidelines:</label>
+                                <ul id="res-notes-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- FOOD DETAILS MODAL -->
+    <div id="listing-modal" class="modal-overlay hidden" onclick="handleModalOverlayClick(event)">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-food-icon" id="modal-icon">🍅</span>
+                    <div>
+                        <h2 id="modal-food-name">Food Details</h2>
+                        <span class="modal-quantity" id="modal-quantity">100 kg</span>
+                    </div>
+                </div>
+                <button class="btn-close-modal" onclick="closeListingModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Badges Row -->
+                <div class="modal-badges-row">
+                    <span class="action-badge" id="modal-action-badge">SELL</span>
+                    <span class="urgency-badge" id="modal-urgency-badge">HIGH URGENCY</span>
+                    <span class="status-pill" id="modal-status-pill">AVAILABLE</span>
+                </div>
+
+                <!-- Price & Discount Highlight -->
+                <div class="modal-price-box" id="modal-price-box">
+                    <div class="price-item">
+                        <span class="price-label">Listed Price:</span>
+                        <strong class="price-value" id="modal-current-price">₹40 / kg</strong>
+                    </div>
+                    <div class="price-item suggested" id="modal-suggested-price-row">
+                        <span class="price-label">AI Suggested Price:</span>
+                        <strong class="price-value highlight" id="modal-suggested-price">₹35 / kg</strong>
+                    </div>
+                    <div class="discount-badge" id="modal-discount-badge">12.5% OFF</div>
+                </div>
+
+                <!-- Grid Details -->
+                <div class="modal-details-grid">
+                    <div class="modal-detail-item">
+                        <span class="detail-label">📍 Location</span>
+                        <span class="detail-value" id="modal-location">Chennai</span>
+                    </div>
+                    <div class="modal-detail-item" id="modal-distance-row">
+                        <span class="detail-label">🚗 Distance</span>
+                        <span class="detail-value" id="modal-distance">4.2 km away</span>
+                    </div>
+                    <div class="modal-detail-item" id="modal-harvest-row">
+                        <span class="detail-label">🌾 Harvest Date</span>
+                        <span class="detail-value" id="modal-harvest-date">2026-10-04</span>
+                    </div>
+                    <div class="modal-detail-item" id="modal-expiry-row">
+                        <span class="detail-label">⏳ Expiry Date</span>
+                        <span class="detail-value" id="modal-expiry-date">2026-10-10</span>
+                    </div>
+                </div>
+
+                <!-- HarvestGuard AI Intelligence Block -->
+                <div class="modal-ai-box">
+                    <div class="ai-box-header">
+                        <span class="ai-icon">✨</span>
+                        <strong>HarvestGuard AI Recommendation</strong>
+                        <span class="ai-confidence" id="modal-confidence">Confidence: 88%</span>
+                    </div>
+                    <p class="ai-reason" id="modal-ai-reason">Harvested yesterday and prompt sale maximizes value retention.</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-modal-cancel" onclick="closeListingModal()">Close</button>
+                <button class="btn-modal-claim" id="modal-claim-btn" onclick="handleModalClaimClick()">
+                    <span>🛒 Claim Food Listing</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

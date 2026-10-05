@@ -1,0 +1,6 @@
+{
+  "name": "SCRAPLY - AI Food Recovery & Surplus Management",
+  "description": "Multimodal AI food intelligence platform powered by Gemma 4 to analyze food condition, estimate freshness, predict risk, and optimize surplus food recovery pathways.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
